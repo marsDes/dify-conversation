@@ -6,6 +6,7 @@ const translation = {
   },
   chat: {
     newChat: 'New chat',
+    chatSettingsTitle: 'New chat setup',
     pinnedTitle: 'Pinned',
     unpinnedTitle: 'Chats',
     newChatDefaultName: 'New conversation',

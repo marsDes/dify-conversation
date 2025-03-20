@@ -3,12 +3,11 @@
 import type { RefObject } from 'react'
 import { createContext, useContext } from 'use-context-selector'
 import type {
-  Callback,
   ChatConfig,
-  ChatItemInTree,
+  ChatItem,
   Feedback,
 } from '../types'
-import type { ThemeBuilder } from '@/app/components/embedded-chatbot/theme/theme-context'
+import type { ThemeBuilder } from './theme/theme-context'
 import type {
   AppConversationData,
   AppData,
@@ -16,7 +15,7 @@ import type {
   ConversationItem,
 } from '@/models/share'
 
-export type ChatWithHistoryContextValue = {
+export type EmbeddedChatbotContextValue = {
   appInfoError?: any
   appInfoLoading?: boolean
   appMeta?: AppMeta
@@ -25,22 +24,16 @@ export type ChatWithHistoryContextValue = {
   appChatListDataLoading?: boolean
   currentConversationId: string
   currentConversationItem?: ConversationItem
-  appPrevChatTree: ChatItemInTree[]
+  appPrevChatList: ChatItem[]
   pinnedConversationList: AppConversationData['data']
   conversationList: AppConversationData['data']
-  showConfigPanelBeforeChat: boolean
   newConversationInputs: Record<string, any>
   newConversationInputsRef: RefObject<Record<string, any>>
   handleNewConversationInputsChange: (v: Record<string, any>) => void
   inputsForms: any[]
   handleNewConversation: () => void
-  handleStartChat: () => void
+  handleStartChat: (callback?: any) => void
   handleChangeConversation: (conversationId: string) => void
-  handlePinConversation: (conversationId: string) => void
-  handleUnpinConversation: (conversationId: string) => void
-  handleDeleteConversation: (conversationId: string, callback: Callback) => void
-  conversationRenaming: boolean
-  handleRenameConversation: (conversationId: string, newName: string, callback: Callback) => void
   handleNewConversationCompleted: (newConversationId: string) => void
   chatShouldReloadKey: string
   isMobile: boolean
@@ -49,31 +42,33 @@ export type ChatWithHistoryContextValue = {
   handleFeedback: (messageId: string, feedback: Feedback) => void
   currentChatInstanceRef: RefObject<{ handleStop: () => void }>
   themeBuilder?: ThemeBuilder
+  clearChatList?: boolean
+  setClearChatList: (state: boolean) => void
+  isResponding?: boolean
+  setIsResponding: (state: boolean) => void,
 }
 
-export const ChatWithHistoryContext = createContext<ChatWithHistoryContextValue>({
+export const EmbeddedChatbotContext = createContext<EmbeddedChatbotContextValue>({
   currentConversationId: '',
-  appPrevChatTree: [],
+  appPrevChatList: [],
   pinnedConversationList: [],
   conversationList: [],
-  showConfigPanelBeforeChat: false,
   newConversationInputs: {},
   newConversationInputsRef: { current: {} },
-  handleNewConversationInputsChange: () => { },
+  handleNewConversationInputsChange: () => {},
   inputsForms: [],
-  handleNewConversation: () => { },
-  handleStartChat: () => { },
-  handleChangeConversation: () => { },
-  handlePinConversation: () => { },
-  handleUnpinConversation: () => { },
-  handleDeleteConversation: () => { },
-  conversationRenaming: false,
-  handleRenameConversation: () => { },
-  handleNewConversationCompleted: () => { },
+  handleNewConversation: () => {},
+  handleStartChat: () => {},
+  handleChangeConversation: () => {},
+  handleNewConversationCompleted: () => {},
   chatShouldReloadKey: '',
   isMobile: false,
   isInstalledApp: false,
-  handleFeedback: () => { },
-  currentChatInstanceRef: { current: { handleStop: () => { } } },
+  handleFeedback: () => {},
+  currentChatInstanceRef: { current: { handleStop: () => {} } },
+  clearChatList: false,
+  setClearChatList: () => {},
+  isResponding: false,
+  setIsResponding: () => {},
 })
-export const useChatWithHistoryContext = () => useContext(ChatWithHistoryContext)
+export const useEmbeddedChatbotContext = () => useContext(EmbeddedChatbotContext)

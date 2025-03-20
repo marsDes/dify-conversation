@@ -19,7 +19,7 @@ import type {
   OnRegenerate,
   OnSend,
 } from '../types'
-import type { ThemeBuilder } from './embedded-chatbot/theme/theme-context'
+import type { ThemeBuilder } from '@/app/components/embedded-chatbot/theme/theme-context'
 import Question from './question'
 import Answer from './answer'
 import ChatInputArea from './chat-input-area'

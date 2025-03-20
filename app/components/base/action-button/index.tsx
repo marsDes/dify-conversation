@@ -8,6 +8,7 @@ enum ActionButtonState {
   Active = 'active',
   Disabled = 'disabled',
   Default = '',
+  Hover = 'hover',
 }
 
 const actionButtonVariants = cva(

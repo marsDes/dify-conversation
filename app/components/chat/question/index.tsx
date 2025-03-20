@@ -6,8 +6,8 @@ import {
   memo,
 } from 'react'
 import type { ChatItem } from '../../types'
-import type { Theme } from '../embedded-chatbot/theme/theme-context'
-import { CssTransform } from '../embedded-chatbot/theme/utils'
+import type { Theme } from '@/app/components/embedded-chatbot/theme/theme-context'
+import { CssTransform } from '@/app/components/embedded-chatbot/theme/utils'
 import { User } from '@/app/components/base/icons/src/public/avatar'
 import { Markdown } from '@/app/components/base/markdown'
 import { FileList } from '@/app/components/base/file-uploader'

@@ -51,6 +51,8 @@ export const useChat = (
   },
   prevChatTree?: ChatItemInTree[],
   stopChat?: (taskId: string) => void,
+  clearChatList?: boolean,
+  clearChatListCallback?: (state: boolean) => void,
 ) => {
   const { t } = useTranslation()
   const { formatTime } = useTimestamp()
@@ -150,7 +152,7 @@ export const useChat = (
   const handleResponding = useCallback((isResponding: boolean) => {
     setIsResponding(isResponding)
     isRespondingRef.current = isResponding
-  }, [])
+  }, [isResponding, isRespondingRef])
 
   const handleStop = useCallback(() => {
     hasStopResponded.current = true
@@ -163,12 +165,13 @@ export const useChat = (
       suggestedQuestionsAbortControllerRef.current.abort()
   }, [stopChat, handleResponding])
 
-  const handleRestart = useCallback(() => {
+  const handleRestart = useCallback((cb?: any) => {
     conversationId.current = ''
     taskIdRef.current = ''
     handleStop()
     setChatTree([])
     setSuggestQuestions([])
+    cb?.()
   }, [handleStop])
 
   const updateCurrentQAOnTree = useCallback(({
@@ -647,6 +650,11 @@ export const useChat = (
       } as Annotation,
     })
   }, [chatList, updateChatTreeNode])
+
+  useEffect(() => {
+    if (clearChatList)
+      handleRestart(() => clearChatListCallback?.(false))
+  }, [clearChatList, clearChatListCallback, handleRestart])
 
   return {
     chatList,

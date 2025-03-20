@@ -57,6 +57,7 @@
     "copy-to-clipboard": "^3.3.3",
     "dayjs": "^1.11.13",
     "dify-client-plus": "^1.0.5",
+    "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
     "emoji-mart": "^5.6.0",
     "eslint": "^9.18.0",

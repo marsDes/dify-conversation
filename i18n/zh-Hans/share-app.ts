@@ -6,6 +6,7 @@ const translation = {
   },
   chat: {
     newChat: '新对话',
+    chatSettingsTitle: '新对话设置',
     pinnedTitle: '已置顶',
     unpinnedTitle: '对话列表',
     newChatDefaultName: '新的对话',

@@ -4,7 +4,7 @@ import {
   useState,
 } from 'react'
 import { useAsyncEffect } from 'ahooks'
-import { useThemeContext } from '@/app/components/chat/embedded-chatbot/theme/theme-context'
+import { useThemeContext } from '@/app/components/embedded-chatbot/theme/theme-context'
 import {
   ChatWithHistoryContext,
   useChatWithHistoryContext,
@@ -17,24 +17,7 @@ import ChatWrapper from './chat-wrapper'
 import type { InstalledApp } from '@/models/explore'
 import Loading from '@/app/components/base/loading'
 import useBreakpoints, { MediaType } from '@/hooks/use-breakpoints'
-// import { checkOrSetAccessToken } from '@/app/components/share/utils'
-export const checkOrSetAccessToken = async () => {
-  console.log('checkOrSetAccessToken-mars')
-  const sharedToken = globalThis.location.pathname.split('/').slice(-1)[0]
-  const accessToken = localStorage.getItem('token') || JSON.stringify({ [sharedToken]: '' })
-  let accessTokenJson = { [sharedToken]: '' }
-  try {
-    accessTokenJson = JSON.parse(accessToken)
-  }
-  catch (e) {
-
-  }
-  if (!accessTokenJson[sharedToken]) {
-    const res = await { access_token: "a" }
-    accessTokenJson[sharedToken] = res.access_token
-    localStorage.setItem('token', JSON.stringify(accessTokenJson))
-  }
-}
+import { checkOrSetAccessToken } from '@/app/components/share/utils'
 import AppUnavailable from '@/app/components/base/app-unavailable'
 
 type ChatWithHistoryProps = {

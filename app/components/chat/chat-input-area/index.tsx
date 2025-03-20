@@ -10,7 +10,7 @@ import type {
   EnableType,
   OnSend,
 } from '../../types'
-import type { Theme } from '../embedded-chatbot/theme/theme-context'
+import type { Theme } from '@/app/components/embedded-chatbot/theme/theme-context'
 import type { InputForm } from '../type'
 
 import { useCheckInputsForms } from '../check-input-forms-hooks'

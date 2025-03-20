@@ -1,7 +1,15 @@
-import { API_PREFIX } from '@/config'
+import {API_PREFIX} from '@/config'
 import Toast from '@/app/components/base/toast'
 import type { AnnotationReply, MessageEnd, MessageReplace, ThoughtItem } from '@/app/components/chat/type-mars'
 import type { VisionFile } from '@/types/app'
+import {
+  AgentLogResponse,
+  IterationFinishedResponse,
+  IterationNextResponse,
+  IterationStartedResponse, LoopFinishedResponse, LoopNextResponse, LoopStartedResponse, ParallelBranchFinishedResponse,
+  ParallelBranchStartedResponse, TextChunkResponse, TextReplaceResponse
+} from "@/types/workflow";
+import { getAppCode } from '@/app/components/share/utils'
 
 const TIME_OUT = 100000
 
@@ -107,12 +115,27 @@ export type IOnFile = (file: VisionFile) => void
 export type IOnMessageEnd = (messageEnd: MessageEnd) => void
 export type IOnMessageReplace = (messageReplace: MessageReplace) => void
 export type IOnAnnotationReply = (messageReplace: AnnotationReply) => void
-export type IOnCompleted = (hasError?: boolean) => void
+export type IOnCompleted = (hasError?: boolean, errorMessage?: string) => void
 export type IOnError = (msg: string, code?: string) => void
+
 export type IOnWorkflowStarted = (workflowStarted: WorkflowStartedResponse) => void
 export type IOnWorkflowFinished = (workflowFinished: WorkflowFinishedResponse) => void
 export type IOnNodeStarted = (nodeStarted: NodeStartedResponse) => void
 export type IOnNodeFinished = (nodeFinished: NodeFinishedResponse) => void
+export type IOnIterationStarted = (workflowStarted: IterationStartedResponse) => void
+export type IOnIterationNext = (workflowStarted: IterationNextResponse) => void
+export type IOnNodeRetry = (nodeFinished: NodeFinishedResponse) => void
+export type IOnIterationFinished = (workflowFinished: IterationFinishedResponse) => void
+export type IOnParallelBranchStarted = (parallelBranchStarted: ParallelBranchStartedResponse) => void
+export type IOnParallelBranchFinished = (parallelBranchFinished: ParallelBranchFinishedResponse) => void
+export type IOnTextChunk = (textChunk: TextChunkResponse) => void
+export type IOnTTSChunk = (messageId: string, audioStr: string, audioType?: string) => void
+export type IOnTTSEnd = (messageId: string, audioStr: string, audioType?: string) => void
+export type IOnTextReplace = (textReplace: TextReplaceResponse) => void
+export type IOnLoopStarted = (workflowStarted: LoopStartedResponse) => void
+export type IOnLoopNext = (workflowStarted: LoopNextResponse) => void
+export type IOnLoopFinished = (workflowFinished: LoopFinishedResponse) => void
+export type IOnAgentLog = (agentLog: AgentLogResponse) => void
 
 type IOtherOptions = {
   isPublicAPI?: boolean
@@ -137,6 +160,12 @@ function unicodeToChar(text: string) {
   return text.replace(/\\u[0-9a-f]{4}/g, (_match, p1) => {
     return String.fromCharCode(parseInt(p1, 16))
   })
+}
+
+function addAppCodeHeader(headers: Headers): Headers {
+  const h = new Headers(headers || {})
+  h.append('X-App-Code', getAppCode())
+  return h
 }
 
 const handleStream = (
@@ -248,8 +277,10 @@ const handleStream = (
   read()
 }
 
-const baseFetch = (url: string, fetchOptions: any, { needAllResponseContent }: IOtherOptions) => {
+const baseFetch = <T>(url: string, fetchOptions: any, { needAllResponseContent }: IOtherOptions) => {
   const options = Object.assign({}, baseOptions, fetchOptions)
+
+  options.headers = addAppCodeHeader(options.headers)
 
   const urlPrefix = API_PREFIX
 
@@ -319,7 +350,7 @@ const baseFetch = (url: string, fetchOptions: any, { needAllResponseContent }: I
           // return data
           const data = options.headers.get('Content-type') === ContentType.download ? res.blob() : res.json()
 
-          resolve(needAllResponseContent ? resClone : data)
+          resolve((needAllResponseContent ? resClone : data) as T)
         })
         .catch((err) => {
           Toast.notify({ type: 'error', message: err })
@@ -341,6 +372,9 @@ export const upload = (fetchOptions: any, url?: string): Promise<any> => {
     ...defaultOptions,
     ...fetchOptions,
   }
+
+  options.headers = addAppCodeHeader(options.headers)
+
   return new Promise((resolve, reject) => {
     const xhr = options.xhr
     xhr.open(options.method, options.url)
@@ -381,6 +415,8 @@ export const ssePost = (
     method: 'POST',
   }, fetchOptions)
 
+  options.headers = addAppCodeHeader(options.headers)
+
   const urlPrefix = API_PREFIX
   const urlWithPrefix = `${urlPrefix}${url.startsWith('/') ? url : `/${url}`}`
 
@@ -415,22 +451,45 @@ export const ssePost = (
     })
 }
 
-export const request = (url: string, options = {}, otherOptions?: IOtherOptions) => {
-  return baseFetch(url, options, otherOptions || {})
+export const request = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+  return baseFetch<T>(url, options, otherOptions || {})
 }
 
-export const get = (url: string, options = {}, otherOptions?: IOtherOptions) => {
-  return request(url, Object.assign({}, options, { method: 'GET' }), otherOptions)
+export const get = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+  return request<T>(url, Object.assign({}, options, { method: 'GET' }), otherOptions)
 }
 
-export const post = (url: string, options = {}, otherOptions?: IOtherOptions) => {
-  return request(url, Object.assign({}, options, { method: 'POST' }), otherOptions)
+// For public API
+export const getPublic = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+    return get<T>(url, options, { ...otherOptions, isPublicAPI: true })
 }
 
-export const put = (url: string, options = {}, otherOptions?: IOtherOptions) => {
-  return request(url, Object.assign({}, options, { method: 'PUT' }), otherOptions)
+export const post = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+  return request<T>(url, Object.assign({}, options, { method: 'POST' }), otherOptions)
 }
 
-export const del = (url: string, options = {}, otherOptions?: IOtherOptions) => {
-  return request(url, Object.assign({}, options, { method: 'DELETE' }), otherOptions)
+export const postPublic = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+    return post<T>(url, options, { ...otherOptions, isPublicAPI: true })
 }
+
+
+export const put = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+  return request<T>(url, Object.assign({}, options, { method: 'PUT' }), otherOptions)
+}
+
+export const del = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+  return request<T>(url, Object.assign({}, options, { method: 'DELETE' }), otherOptions)
+}
+
+export const delPublic = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+    return del<T>(url, options, { ...otherOptions, isPublicAPI: true })
+}
+
+export const patch = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+    return request<T>(url, Object.assign({}, options, { method: 'PATCH' }), otherOptions)
+}
+
+export const patchPublic = <T = any>(url: string, options = {}, otherOptions?: IOtherOptions) => {
+    return patch<T>(url, options, { ...otherOptions, isPublicAPI: true })
+}
+

@@ -9,7 +9,7 @@ import {
 import type {
   EnableType,
 } from '../../types'
-import type { Theme } from '../embedded-chatbot/theme/theme-context'
+import type { Theme } from '@/app/components/embedded-chatbot/theme/theme-context'
 import Button from '@/app/components/base/button'
 import ActionButton from '@/app/components/base/action-button'
 import { FileUploaderInChatInput } from '@/app/components/base/file-uploader'
